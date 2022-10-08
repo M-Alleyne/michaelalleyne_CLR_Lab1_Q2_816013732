@@ -1,4 +1,5 @@
-/* gpio example
+/* 816013732 gpio code
+   Lab 1 - Question 2
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -28,24 +29,19 @@ static const char *TAG = "main";
  * This test code shows how to configure gpio and how to use gpio interrupt.
  *
  * GPIO status:
- * GPIO15: output
- * GPIO16: output
- * GPIO4:  input, pulled up, interrupt from rising edge and falling edge
- * GPIO5:  input, pulled up, interrupt from rising edge.
+ * GPIO1: output
+ * GPIO0:  input, pulled up, interrupt from rising edge.
  *
  * Test:
- * Connect GPIO15 with GPIO4
- * Connect GPIO16 with GPIO5
- * Generate pulses on GPIO15/16, that triggers interrupt on GPIO4/5
+ * Connect GPIO1 with GPIO0
+ * Generate pulses on GPIO1, that triggers interrupt on GPIO0
  *
  */
 
-#define GPIO_OUTPUT_IO_0    15
-#define GPIO_OUTPUT_IO_1    16
-#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1))
-#define GPIO_INPUT_IO_0     4
-#define GPIO_INPUT_IO_1     5
-#define GPIO_INPUT_PIN_SEL  ((1ULL<<GPIO_INPUT_IO_0) | (1ULL<<GPIO_INPUT_IO_1))
+#define GPIO_OUTPUT_IO_0    1
+#define GPIO_OUTPUT_PIN_SEL  (1ULL<<GPIO_OUTPUT_IO_0)
+#define GPIO_INPUT_IO_0     0
+#define GPIO_INPUT_PIN_SEL  (1ULL<<GPIO_INPUT_IO_0)
 
 static xQueueHandle gpio_evt_queue = NULL;
 
@@ -73,7 +69,7 @@ void app_main(void)
     io_conf.intr_type = GPIO_INTR_DISABLE;
     //set as output mode
     io_conf.mode = GPIO_MODE_OUTPUT;
-    //bit mask of the pins that you want to set,e.g.GPIO15/16
+    //bit mask of the pins that you want to set,e.g.GPIO1
     io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
     //disable pull-down mode
     io_conf.pull_down_en = 0;
@@ -104,8 +100,6 @@ void app_main(void)
     gpio_install_isr_service(0);
     //hook isr handler for specific gpio pin
     gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *) GPIO_INPUT_IO_0);
-    //hook isr handler for specific gpio pin
-    gpio_isr_handler_add(GPIO_INPUT_IO_1, gpio_isr_handler, (void *) GPIO_INPUT_IO_1);
 
     //remove isr handler for gpio number.
     gpio_isr_handler_remove(GPIO_INPUT_IO_0);
@@ -118,7 +112,6 @@ void app_main(void)
         ESP_LOGI(TAG, "cnt: %d\n", cnt++);
         vTaskDelay(1000 / portTICK_RATE_MS);
         gpio_set_level(GPIO_OUTPUT_IO_0, cnt % 2);
-        gpio_set_level(GPIO_OUTPUT_IO_1, cnt % 2);
     }
 }
 
